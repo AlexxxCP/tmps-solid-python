@@ -1,13 +1,13 @@
-# Пример друга не включается в репозиторий.
+# Reference example (excluded from version control).
 /Example/
 
-# Временные файлы Python и виртуальные окружения.
+# Python cache files and virtual environments.
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 
-# Локальные настройки редакторов и секреты.
+# Local editor settings and secrets.
 .vscode/
 .idea/
 .env

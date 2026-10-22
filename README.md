@@ -1,76 +1,77 @@
-# TMPS: маленький проект с тремя принципами SOLID
+# TMPS: A Tiny Project Using Three SOLID Principles
 
-**MiniShop** — консольная программа на Python, которая считает стоимость заказа
-с обычной или срочной доставкой. Проект демонстрирует **SRP, OCP и DIP**.
+**MiniShop** is a Python console application that calculates an order total
+with standard or express delivery. It demonstrates **SRP, OCP, and DIP**.
 
-## Что делает программа
+## Application Description
 
-Есть два товара стоимостью 100 и 200 леев. Обычная доставка стоит 30 леев,
-срочная — 60 леев. Программа показывает итоговую сумму для обоих вариантов:
+There are two items priced at 100 and 200 MDL. Standard delivery costs 30 MDL,
+and express delivery costs 60 MDL. The application displays both order totals:
 
 ```text
-MiniShop: расчёт стоимости заказа
-Товары: 100 + 200 = 300 леев
+MiniShop: order total calculator
+Items: 100 + 200 = 300 MDL
 
-Обычная доставка (30 леев): итого 330 леев
-Срочная доставка (60 леев): итого 360 леев
+Standard delivery (30 MDL): total 330 MDL
+Express delivery (60 MDL): total 360 MDL
 ```
 
-Это учебный расчёт с заранее заданными ценами: без меню, базы данных и оплаты.
-Все суммы заданы целым числом леев. Цены товаров можно изменить в списке
-`prices` внутри функции `main()`.
+This is an educational example with predefined prices, no menu, database,
+or payment processing. All amounts are whole Moldovan lei (MDL).
+To change the item prices, edit the `prices` list inside `main()`.
 
-## Как запустить
+## Running the Application
 
-Нужен Python 3.9 или новее. Сторонние библиотеки не нужны.
+Python 3.9 or later is required. No external libraries are needed.
 
-В терминале из папки проекта:
+Run this command from the project directory:
 
 ```powershell
 python main.py
 ```
 
-## Структура
+## Project Structure
 
-- `main.py` — весь код программы.
-- `README.md` — описание проекта и объяснение принципов.
-- `.gitignore` — исключает `Example/`, кэш Python и локальное окружение из Git.
+- `main.py` contains all application code.
+- `README.md` describes the project and explains the principles.
+- `.gitignore` excludes `Example/`, Python cache files, and local environments.
 
-| Компонент | За что отвечает |
+| Component | Responsibility |
 | --- | --- |
-| `Delivery` | Задаёт общий контракт: у доставки можно узнать стоимость через `get_cost()`. |
-| `StandardDelivery` | Возвращает стоимость обычной доставки: 30 леев. |
-| `ExpressDelivery` | Возвращает стоимость срочной доставки: 60 леев. |
-| `OrderCalculator` | Складывает цены товаров и стоимость доставки. |
-| `main()` | Создаёт объекты и выводит результат в консоль. |
+| `Delivery` | Defines a common contract for getting a delivery cost through `get_cost()`. |
+| `StandardDelivery` | Returns the standard delivery cost: 30 MDL. |
+| `ExpressDelivery` | Returns the express delivery cost: 60 MDL. |
+| `OrderCalculator` | Adds item prices and the delivery cost. |
+| `main()` | Creates objects and prints the results. |
 
-`Delivery` — абстрактный класс. Через `ABC` и `@abstractmethod` он требует,
-чтобы конкретные способы доставки реализовали метод `get_cost()`.
-Просто создать объект `Delivery()` нельзя.
+`Delivery` is an abstract class. Using `ABC` and `@abstractmethod`, it requires
+concrete delivery classes to implement `get_cost()`.
+An instance of `Delivery()` cannot be created directly.
 
-## Три принципа SOLID
+## Three SOLID Principles
 
-SOLID — пять принципов проектирования объектно-ориентированного кода.
-В этой работе разобраны три из них.
+SOLID is a set of five principles for designing object-oriented software.
+This project explains three of them.
 
-### 1. S — Single Responsibility Principle (единственная ответственность)
+### 1. S - Single Responsibility Principle
 
-**Идея:** у класса должна быть одна причина для изменения.
+**Idea:** a class should have one reason to change.
 
-`OrderCalculator` отвечает только за расчёт суммы. Он не печатает чек и
-не выбирает тариф доставки. Стоимость задают классы доставки, а результат
-печатает `main()`.
+`OrderCalculator` is responsible only for calculating the total. It does not
+print a receipt or choose a delivery rate. Delivery classes define the costs,
+and `main()` prints the results.
 
-Если изменится формат вывода, меняется `main()`. Если изменится тариф
-обычной доставки, меняется `StandardDelivery`. Формулу расчёта заказа
-при этом менять не нужно.
+If the output format changes, update `main()`. If the standard delivery rate
+changes, update `StandardDelivery`. Neither change requires modifying the
+order calculation formula.
 
-### 2. O — Open/Closed Principle (открытость для расширения, закрытость для изменения)
+### 2. O - Open/Closed Principle
 
-**Идея:** новое поведение можно добавить, не меняя уже работающий код компонента.
+**Idea:** a component should support new behavior through extension without
+requiring changes to its existing implementation.
 
-`OrderCalculator` вызывает `get_cost()` и не проверяет, какой именно способ
-доставки ему передали. Для бесплатного самовывоза достаточно нового класса:
+`OrderCalculator` calls `get_cost()` without checking which delivery class
+it receives. Free pickup can be added as a new class:
 
 ```python
 from main import Delivery, OrderCalculator
@@ -85,40 +86,42 @@ calculator = OrderCalculator(PickupDelivery())
 print(calculator.calculate_total([100, 200]))  # 300
 ```
 
-Этот фрагмент показывает возможное расширение; в основной программе два способа
-доставки. Код `OrderCalculator` для самовывоза менять не нужно. В точке сборки
-программы, например в `main()`, нужно лишь создать и передать новый объект.
+This snippet illustrates a possible extension; the main application includes
+two delivery methods. Adding pickup requires no changes to `OrderCalculator`.
+The setup code, such as `main()`, only needs to create and pass the new object.
 
-### 3. D — Dependency Inversion Principle (инверсия зависимостей)
+### 3. D - Dependency Inversion Principle
 
-**Идея:** логика высокого уровня должна зависеть от абстракций,
-а не от конкретных реализаций.
+**Idea:** high-level logic should depend on abstractions rather than concrete
+implementations.
 
-Логика высокого уровня здесь — `OrderCalculator`. Он принимает абстракцию
-`Delivery` в конструкторе и вызывает её метод `get_cost()`.
-Он не создаёт внутри себя `StandardDelivery` или `ExpressDelivery`.
+The high-level logic here is `OrderCalculator`. Its constructor accepts
+the `Delivery` abstraction, and the calculator calls its `get_cost()` method.
+It does not create `StandardDelivery` or `ExpressDelivery` internally.
 
-Конкретную доставку создаёт `main()` и передаёт калькулятору. Это передача
-зависимости через конструктор. Так способ доставки можно заменить,
-сохранив код расчёта.
+Instead, `main()` creates the concrete delivery object and passes it to the
+calculator. This is constructor dependency injection. The delivery method
+can therefore be replaced without changing the calculation code.
 
-В Python аннотация `delivery: Delivery` сама по себе не проверяет тип
-во время выполнения. Принцип выражен в устройстве кода: калькулятор использует
-только общий контракт, а выбор реализации находится снаружи.
+In Python, the `delivery: Delivery` type annotation does not enforce a type
+check at runtime. The principle is expressed through the code structure:
+the calculator uses only the common contract, while the implementation is
+chosen outside it.
 
-## Краткий текст для защиты
+## Short Presentation Script
 
-> Я сделал MiniShop — маленькую программу для расчёта заказа с доставкой.
-> Два товара стоят вместе 300 леев. С обычной доставкой получается 330,
-> со срочной — 360.
+> I created MiniShop, a small application that calculates an order total
+> including delivery. The two items cost 300 MDL together. The total is
+> 330 MDL with standard delivery or 360 MDL with express delivery.
 >
-> Первый принцип — SRP: калькулятор считает сумму, классы доставки задают
-> тарифы, а функция main выводит результат.
+> The first principle is SRP: the calculator calculates the total,
+> delivery classes define the rates, and main displays the results.
 >
-> Второй — OCP: можно добавить самовывоз отдельным классом, не меняя калькулятор.
+> The second principle is OCP: pickup can be added as a separate class
+> without changing the calculator.
 >
-> Третий — DIP: калькулятор получает общий интерфейс Delivery,
-> а конкретный способ доставки передаётся ему снаружи.
+> The third principle is DIP: the calculator depends on the common Delivery
+> interface, and the concrete delivery method is provided from outside.
 >
-> Так каждый компонент выполняет свою задачу, а новые способы доставки
-> добавляются без изменения расчёта заказа.
+> Each component has a focused responsibility, and new delivery methods
+> can be added without changing the order calculation.
