@@ -21,6 +21,12 @@ class ExpressDelivery(Delivery):
         return 60
 
 
+# OCP: add free pickup without changing OrderCalculator.
+class PickupDelivery(Delivery):
+    def get_cost(self) -> int:
+        return 0
+
+
 class OrderCalculator:
     """SRP (Single Responsibility): only calculate the order total."""
 
@@ -38,6 +44,7 @@ def main() -> None:
     deliveries = [
         ("Standard delivery", StandardDelivery()),
         ("Express delivery", ExpressDelivery()),
+        ("Free pickup", PickupDelivery()),
     ]
 
     # SRP: keep console output here, outside OrderCalculator.

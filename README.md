@@ -1,12 +1,14 @@
 # TMPS: A Tiny Project Using Three SOLID Principles
 
 **MiniShop** is a Python console application that calculates an order total
-with standard or express delivery. It demonstrates **SRP, OCP, and DIP**.
+with standard delivery, express delivery, or free pickup.
+It demonstrates **SRP, OCP, and DIP**.
 
 ## Application Description
 
 There are two items priced at 100 and 200 MDL. Standard delivery costs 30 MDL,
-and express delivery costs 60 MDL. The application displays both order totals:
+and express delivery costs 60 MDL. Free pickup costs 0 MDL.
+The application displays all three order totals:
 
 ```text
 MiniShop: order total calculator
@@ -14,6 +16,7 @@ Items: 100 + 200 = 300 MDL
 
 Standard delivery (30 MDL): total 330 MDL
 Express delivery (60 MDL): total 360 MDL
+Free pickup (0 MDL): total 300 MDL
 ```
 
 This is an educational example with predefined prices, no menu, database,
@@ -41,6 +44,7 @@ python main.py
 | `Delivery` | Defines a common contract for getting a delivery cost through `get_cost()`. |
 | `StandardDelivery` | Returns the standard delivery cost: 30 MDL. |
 | `ExpressDelivery` | Returns the express delivery cost: 60 MDL. |
+| `PickupDelivery` | Returns the pickup cost: 0 MDL. |
 | `OrderCalculator` | Adds item prices and the delivery cost. |
 | `main()` | Creates objects and prints the results. |
 
@@ -70,25 +74,19 @@ order calculation formula.
 **Idea:** a component should support new behavior through extension without
 requiring changes to its existing implementation.
 
-`OrderCalculator` calls `get_cost()` without checking which delivery class
-it receives. Free pickup can be added as a new class:
+`OrderCalculator` calls `get_cost()` without checking the concrete delivery class.
+`PickupDelivery` extends `Delivery` and returns `0`. It was added without
+changing `OrderCalculator`; only `main()` registers the new option.
 
 ```python
-from main import Delivery, OrderCalculator
-
-
-class PickupDelivery(Delivery):
-    def get_cost(self) -> int:
-        return 0
-
+from main import OrderCalculator, PickupDelivery
 
 calculator = OrderCalculator(PickupDelivery())
 print(calculator.calculate_total([100, 200]))  # 300
 ```
 
-This snippet illustrates a possible extension; the main application includes
-two delivery methods. Adding pickup requires no changes to `OrderCalculator`.
-The setup code, such as `main()`, only needs to create and pass the new object.
+To add another delivery option, create a new `Delivery` subclass and pass its
+object to the existing calculator.
 
 ### 3. D - Dependency Inversion Principle
 
@@ -97,7 +95,7 @@ implementations.
 
 The high-level logic here is `OrderCalculator`. Its constructor accepts
 the `Delivery` abstraction, and the calculator calls its `get_cost()` method.
-It does not create `StandardDelivery` or `ExpressDelivery` internally.
+It does not create concrete delivery objects internally.
 
 Instead, `main()` creates the concrete delivery object and passes it to the
 calculator. This is constructor dependency injection. The delivery method
@@ -112,12 +110,13 @@ chosen outside it.
 
 > I created MiniShop, a small application that calculates an order total
 > including delivery. The two items cost 300 MDL together. The total is
-> 330 MDL with standard delivery or 360 MDL with express delivery.
+> 330 MDL with standard delivery, 360 MDL with express delivery,
+> or 300 MDL with free pickup.
 >
 > The first principle is SRP: the calculator calculates the total,
 > delivery classes define the rates, and main displays the results.
 >
-> The second principle is OCP: pickup can be added as a separate class
+> The second principle is OCP: free pickup was added as a separate class
 > without changing the calculator.
 >
 > The third principle is DIP: the calculator depends on the common Delivery
