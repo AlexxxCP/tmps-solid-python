@@ -1,14 +1,164 @@
-# TMPS: A Tiny Project Using Three SOLID Principles
+# TMPS Laboratory Report: SOLID Principles
 
-**MiniShop** is a Python console application that calculates an order total
-with standard delivery, express delivery, or free pickup.
-It demonstrates **SRP, OCP, and DIP**.
+## Student Information
+
+| Field | Details |
+| --- | --- |
+| Student | Luchiciov Alexei |
+| Group | FAF-241 |
+| Course | Software Design Techniques and Mechanisms (TMPS) |
+| Topic | Application of Three SOLID Principles |
+| Project | MiniShop |
+| Programming language | Python |
+
+The English course title follows the [official UTM Software Engineering curriculum, page 5](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5).
+
+## Objective
+
+Develop a small object-oriented application and demonstrate three SOLID
+principles: Single Responsibility (SRP), Open/Closed (OCP), and Dependency
+Inversion (DIP). Explain where each principle appears in the implementation.
+
+## Technologies
+
+- Python 3.9 or later.
+- Python standard library: `abc` for abstract base classes.
+- Console interface.
+- Git and GitHub for version control and publication.
+
+No external libraries or installation of dependencies are required.
 
 ## Application Description
 
-There are two items priced at 100 and 200 MDL. Standard delivery costs 30 MDL,
-and express delivery costs 60 MDL. Free pickup costs 0 MDL.
-The application displays all three order totals:
+MiniShop calculates the total cost of an order with standard delivery,
+express delivery, or free pickup.
+
+Two predefined items cost 100 and 200 MDL. Their combined price is 300 MDL.
+The application calculates and displays all three options automatically.
+
+| Option | Item subtotal | Delivery cost | Order total |
+| --- | ---: | ---: | ---: |
+| Standard delivery | 300 MDL | 30 MDL | 330 MDL |
+| Express delivery | 300 MDL | 60 MDL | 360 MDL |
+| Free pickup | 300 MDL | 0 MDL | 300 MDL |
+
+The calculation is:
+
+```text
+Order total = sum of item prices + delivery cost
+```
+
+All amounts are whole Moldovan lei (MDL). Prices are stored in the `prices`
+list inside `main()`. This is a fixed demonstration without interactive
+selection, a database, or payment processing. Delivery times are not calculated.
+
+## Project Structure
+
+- [main.py](main.py) contains the complete application and short SOLID comments.
+- [README.md](README.md) contains this laboratory report.
+- [.gitignore](.gitignore) excludes `Example/`, Python cache files, virtual
+  environments, and local settings.
+
+| Component | Responsibility |
+| --- | --- |
+| `Delivery` | Defines the common `get_cost()` operation for delivery options. |
+| `StandardDelivery` | Returns the standard delivery cost: 30 MDL. |
+| `ExpressDelivery` | Returns the express delivery cost: 60 MDL. |
+| `PickupDelivery` | Returns the pickup cost: 0 MDL. |
+| `OrderCalculator` | Adds the item prices and the supplied delivery cost. |
+| `main()` | Creates the objects, runs the demonstration, and prints results. |
+
+`Delivery` is an abstract base class. Its `get_cost()` method is marked with
+`@abstractmethod`, so concrete subclasses must implement that method before
+they can be instantiated.
+
+## How the Application Works
+
+1. `main()` creates the item price list: `[100, 200]`.
+2. It creates standard delivery, express delivery, and pickup objects.
+3. Each delivery object is passed to an `OrderCalculator`.
+4. The calculator sums the item prices and calls the object's `get_cost()`.
+5. `main()` prints the resulting total for each option.
+
+## Application of SOLID Principles
+
+SOLID contains five object-oriented design principles. This report focuses
+on the three selected for the implementation.
+
+### S - Single Responsibility Principle (SRP)
+
+**Meaning:** a class should have one responsibility and one reason to change.
+
+`OrderCalculator` handles the order calculation. Delivery classes define their
+own costs, while console output is kept in `main()`.
+
+For example, changing the standard delivery rate requires updating
+`StandardDelivery`. Changing the output format affects `main()`.
+Neither change requires modifying the calculation formula.
+
+The calculator's calculation method is:
+
+```python
+def calculate_total(self, prices: list[int]) -> int:
+    return sum(prices) + self.delivery.get_cost()
+```
+
+### O - Open/Closed Principle (OCP)
+
+**Meaning:** a component should be open for extension but closed for modification.
+
+Free pickup was added as a new class:
+
+```python
+class PickupDelivery(Delivery):
+    def get_cost(self) -> int:
+        return 0
+```
+
+The new option was included in the delivery list in `main()`.
+The implementation of `OrderCalculator` remained unchanged: it already calls
+`get_cost()` on the supplied delivery object.
+
+Returning `0` makes pickup free. Adding the new option without modifying the
+calculator demonstrates OCP. Another delivery option can be added in the same way.
+
+### D - Dependency Inversion Principle (DIP)
+
+**Meaning:** high-level logic should depend on abstractions rather than
+concrete implementations.
+
+The high-level calculation logic depends on `Delivery`, which defines the
+common `get_cost()` operation. The calculator receives its delivery through
+the constructor:
+
+```python
+def __init__(self, delivery: Delivery):
+    self.delivery = delivery
+```
+
+`main()` creates the concrete delivery objects and passes each one to the
+calculator:
+
+```python
+calculator = OrderCalculator(delivery)
+```
+
+The calculator uses the shared operation to obtain the delivery cost.
+It does not create or select a specific delivery class internally.
+
+The type annotation documents the expected abstraction; it does not enforce
+runtime type checking. DIP is demonstrated by the common delivery interface
+and the separation between object creation and calculation.
+
+## Running the Application
+
+From the repository root, run:
+
+```powershell
+python main.py
+```
+
+## Execution Results
 
 ```text
 MiniShop: order total calculator
@@ -19,108 +169,42 @@ Express delivery (60 MDL): total 360 MDL
 Free pickup (0 MDL): total 300 MDL
 ```
 
-This is an educational example with predefined prices, no menu, database,
-or payment processing. All amounts are whole Moldovan lei (MDL).
-To change the item prices, edit the `prices` list inside `main()`.
+## Verification
 
-## Running the Application
+The application was executed using `python main.py`. It completed successfully,
+and all three totals matched the expected results:
 
-Python 3.9 or later is required. No external libraries are needed.
+| Case | Expected result | Observed result |
+| --- | ---: | ---: |
+| Standard delivery | 330 MDL | 330 MDL |
+| Express delivery | 360 MDL | 360 MDL |
+| Free pickup | 300 MDL | 300 MDL |
 
-Run this command from the project directory:
+The console output also matches the example in this report.
 
-```powershell
-python main.py
-```
+## Conclusion
 
-## Project Structure
-
-- `main.py` contains all application code.
-- `README.md` describes the project and explains the principles.
-- `.gitignore` excludes `Example/`, Python cache files, and local environments.
-
-| Component | Responsibility |
-| --- | --- |
-| `Delivery` | Defines a common contract for getting a delivery cost through `get_cost()`. |
-| `StandardDelivery` | Returns the standard delivery cost: 30 MDL. |
-| `ExpressDelivery` | Returns the express delivery cost: 60 MDL. |
-| `PickupDelivery` | Returns the pickup cost: 0 MDL. |
-| `OrderCalculator` | Adds item prices and the delivery cost. |
-| `main()` | Creates objects and prints the results. |
-
-`Delivery` is an abstract class. Using `ABC` and `@abstractmethod`, it requires
-concrete delivery classes to implement `get_cost()`.
-An instance of `Delivery()` cannot be created directly.
-
-## Three SOLID Principles
-
-SOLID is a set of five principles for designing object-oriented software.
-This project explains three of them.
-
-### 1. S - Single Responsibility Principle
-
-**Idea:** a class should have one reason to change.
-
-`OrderCalculator` is responsible only for calculating the total. It does not
-print a receipt or choose a delivery rate. Delivery classes define the costs,
-and `main()` prints the results.
-
-If the output format changes, update `main()`. If the standard delivery rate
-changes, update `StandardDelivery`. Neither change requires modifying the
-order calculation formula.
-
-### 2. O - Open/Closed Principle
-
-**Idea:** a component should support new behavior through extension without
-requiring changes to its existing implementation.
-
-`OrderCalculator` calls `get_cost()` without checking the concrete delivery class.
-`PickupDelivery` extends `Delivery` and returns `0`. It was added without
-changing `OrderCalculator`; only `main()` registers the new option.
-
-```python
-from main import OrderCalculator, PickupDelivery
-
-calculator = OrderCalculator(PickupDelivery())
-print(calculator.calculate_total([100, 200]))  # 300
-```
-
-To add another delivery option, create a new `Delivery` subclass and pass its
-object to the existing calculator.
-
-### 3. D - Dependency Inversion Principle
-
-**Idea:** high-level logic should depend on abstractions rather than concrete
-implementations.
-
-The high-level logic here is `OrderCalculator`. Its constructor accepts
-the `Delivery` abstraction, and the calculator calls its `get_cost()` method.
-It does not create concrete delivery objects internally.
-
-Instead, `main()` creates the concrete delivery object and passes it to the
-calculator. This is constructor dependency injection. The delivery method
-can therefore be replaced without changing the calculation code.
-
-In Python, the `delivery: Delivery` type annotation does not enforce a type
-check at runtime. The principle is expressed through the code structure:
-the calculator uses only the common contract, while the implementation is
-chosen outside it.
+MiniShop demonstrates three SOLID principles in a small Python application.
+SRP separates delivery costs, calculation, and output. OCP is demonstrated by
+adding free pickup without changing the calculator. DIP allows the calculator
+to use the common `Delivery` abstraction while `main()` supplies concrete objects.
 
 ## Short Presentation Script
 
-> I created MiniShop, a small application that calculates an order total
-> including delivery. The two items cost 300 MDL together. The total is
-> 330 MDL with standard delivery, 360 MDL with express delivery,
-> or 300 MDL with free pickup.
+> My project is MiniShop, a small order total calculator. It adds item prices
+> and the cost of standard delivery, express delivery, or free pickup.
 >
-> The first principle is SRP: the calculator calculates the total,
-> delivery classes define the rates, and main displays the results.
+> I used three SOLID principles. SRP gives each part its own job:
+> delivery classes provide costs, the calculator calculates the total,
+> and main prints the results.
 >
-> The second principle is OCP: free pickup was added as a separate class
-> without changing the calculator.
+> OCP is demonstrated by adding PickupDelivery without changing OrderCalculator.
 >
-> The third principle is DIP: the calculator depends on the common Delivery
-> interface, and the concrete delivery method is provided from outside.
->
-> Each component has a focused responsibility, and new delivery methods
-> can be added without changing the order calculation.
+> DIP means that the calculator uses the common Delivery interface.
+> Main creates a delivery object and passes it to the calculator, which calls
+> get_cost() to obtain its cost.
+
+## References
+
+1. [Technical University of Moldova: Software Engineering curriculum](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5) - official English course title.
+2. [Python documentation: Abstract Base Classes](https://docs.python.org/3.13/library/abc.html) - `ABC` and `abstractmethod`.
