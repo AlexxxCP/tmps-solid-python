@@ -1,4 +1,4 @@
-# TMPS Laboratory Report: SOLID Principles
+# TMPS Laboratory Report 1: Creational Design Patterns
 
 ## Student Information
 
@@ -7,36 +7,49 @@
 | Student | Luchiciov Alexei |
 | Group | FAF-241 |
 | Course | Software Design Techniques and Mechanisms (TMPS) |
-| Topic | Application of Three SOLID Principles |
+| Laboratory work | 1 |
+| Topic | Creational Design Patterns |
 | Project | MiniShop |
 | Programming language | Python |
 
 The English course title follows the [official UTM Software Engineering curriculum, page 5](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5).
 
+## Relation to Laboratory 0
+
+This laboratory continues the MiniShop project from Laboratory 0.
+The earlier report, which describes the SOLID principles, is available in
+[LAB0_SOLID_REPORT.md](LAB0_SOLID_REPORT.md). This laboratory keeps the same
+store, item prices, and delivery options and demonstrates three creational
+design patterns.
+
 ## Objective
 
-Develop a small object-oriented application and demonstrate three SOLID
-principles: Single Responsibility (SRP), Open/Closed (OCP), and Dependency
-Inversion (DIP). Explain where each principle appears in the implementation.
+Extend MiniShop with three creational design patterns:
+
+1. **Builder** to assemble an order step by step.
+2. **Factory Method** to create standard, express, and pickup deliveries.
+3. **Prototype** to copy an existing order and adapt the copy.
+
+The report also briefly explains the other creational patterns named in
+the assignment.
 
 ## Technologies
 
 - Python 3.9 or later.
-- Python standard library: `abc` for abstract base classes.
-- Console interface.
+- Python standard library: `abc` for abstract base classes, `copy.deepcopy()`
+  for cloning an order, and `typing.Optional` for the builder's delivery.
+- Console application.
 - Git and GitHub for version control and publication.
 
-No external libraries or installation of dependencies are required.
+No external Python packages are required.
 
 ## Application Description
 
-MiniShop calculates the total cost of an order with standard delivery,
-express delivery, or free pickup.
+MiniShop calculates the total price of two items, priced at 100 and 200 MDL,
+with standard delivery, express delivery, or free pickup. It prints the totals
+for all three options. The sample order uses the same two items in each case.
 
-Two predefined items cost 100 and 200 MDL. Their combined price is 300 MDL.
-The application calculates and displays all three options automatically.
-
-| Option | Item subtotal | Delivery cost | Order total |
+| Delivery option | Item subtotal | Delivery cost | Order total |
 | --- | ---: | ---: | ---: |
 | Standard delivery | 300 MDL | 30 MDL | 330 MDL |
 | Express delivery | 300 MDL | 60 MDL | 360 MDL |
@@ -48,107 +61,100 @@ The calculation is:
 Order total = sum of item prices + delivery cost
 ```
 
-All amounts are whole Moldovan lei (MDL). Prices are stored in the `prices`
-list inside `main()`. This is a fixed demonstration without interactive
-selection, a database, or payment processing. Delivery times are not calculated.
+The prices are predefined in `main()`. The program automatically demonstrates
+each option; it does not provide an interactive menu, database, payment
+processing, or delivery-time calculations. All amounts are whole Moldovan
+lei (MDL).
 
 ## Project Structure
 
-- [main.py](main.py) contains the complete application and short SOLID comments.
-- [README.md](README.md) contains this laboratory report.
+- [main.py](main.py) contains the application and all three design patterns.
+- [README.md](README.md) is the report for Laboratory 1.
+- [LAB0_SOLID_REPORT.md](LAB0_SOLID_REPORT.md) preserves the report for Laboratory 0.
 - [.gitignore](.gitignore) excludes `Example/`, Python cache files, virtual
   environments, and local settings.
 
 | Component | Responsibility |
 | --- | --- |
-| `Delivery` | Defines the common `get_cost()` operation for delivery options. |
-| `StandardDelivery` | Returns the standard delivery cost: 30 MDL. |
-| `ExpressDelivery` | Returns the express delivery cost: 60 MDL. |
-| `PickupDelivery` | Returns the pickup cost: 0 MDL. |
-| `OrderCalculator` | Adds the item prices and the supplied delivery cost. |
-| `main()` | Creates the objects, runs the demonstration, and prints results. |
-
-`Delivery` is an abstract base class. Its `get_cost()` method is marked with
-`@abstractmethod`, so concrete subclasses must implement that method before
-they can be instantiated.
+| `Delivery` | Defines the common type and `get_cost()` operation. |
+| `StandardDelivery`, `ExpressDelivery`, `PickupDelivery` | Provide their delivery costs. |
+| `DeliveryFactory` | Declares the `create_delivery()` factory method. |
+| Concrete delivery factories | Create one specific delivery type each. |
+| `Order` | Stores order items and delivery, calculates the total, and can be cloned. |
+| `OrderBuilder` | Collects item prices and a delivery, then builds an `Order`. |
+| `build_order()` | Uses a builder and a delivery factory to create an order. |
+| `main()` | Demonstrates and prints each delivery option and the prototype copy. |
 
 ## How the Application Works
 
-1. `main()` creates the item price list: `[100, 200]`.
-2. It creates standard delivery, express delivery, and pickup objects.
-3. Each delivery object is passed to an `OrderCalculator`.
-4. The calculator sums the item prices and calls the object's `get_cost()`.
-5. `main()` prints the resulting total for each option.
+1. `main()` sets the item prices to 100 and 200 MDL.
+2. It passes a concrete delivery factory to `build_order()`.
+3. The builder adds the items, gets a delivery from the factory, and builds
+   an `Order`.
+4. The standard order is cloned to create another order. The clone's delivery
+   is changed to express delivery; the original order keeps its standard delivery.
+5. A separate builder creates the free-pickup order.
+6. The program prints the total for each order and shows the original and
+   cloned totals.
 
-## Application of SOLID Principles
+## Implemented Creational Design Patterns
 
-SOLID contains five object-oriented design principles. This report focuses
-on the three selected for the implementation.
+### 1. Builder
 
-### S - Single Responsibility Principle (SRP)
+**Purpose:** construct a complex object step by step.
 
-**Meaning:** a class should have one responsibility and one reason to change.
-
-`OrderCalculator` handles the order calculation. Delivery classes define their
-own costs, while console output is kept in `main()`.
-
-For example, changing the standard delivery rate requires updating
-`StandardDelivery`. Changing the output format affects `main()`.
-Neither change requires modifying the calculation formula.
-
-The calculator's calculation method is:
+`OrderBuilder` collects item prices using `add_item()`, accepts a delivery
+using `set_delivery()`, and creates the finished order using `build()`.
+The helper `build_order()` shows these steps:
 
 ```python
-def calculate_total(self, prices: list[int]) -> int:
-    return sum(prices) + self.delivery.get_cost()
+builder = OrderBuilder()
+builder.add_item(100)
+builder.add_item(200)
+builder.set_delivery(factory.create_delivery())
+order = builder.build()
 ```
 
-### O - Open/Closed Principle (OCP)
+This makes it clear which parts make up the order before the complete
+`Order` object is created.
 
-**Meaning:** a component should be open for extension but closed for modification.
+### 2. Factory Method
 
-Free pickup was added as a new class:
+**Purpose:** let a creator's subclass decide which concrete product to create.
 
-```python
-class PickupDelivery(Delivery):
-    def get_cost(self) -> int:
-        return 0
-```
+`DeliveryFactory` declares the `create_delivery()` method. Its concrete
+subclasses, such as `StandardDeliveryFactory`, `ExpressDeliveryFactory`,
+and `PickupDeliveryFactory`, each return one matching `Delivery` object.
 
-The new option was included in the delivery list in `main()`.
-The implementation of `OrderCalculator` remained unchanged: it already calls
-`get_cost()` on the supplied delivery object.
+`build_order()` accepts the abstract `DeliveryFactory` type and calls
+`create_delivery()`. The helper does not need to know how that delivery
+object is constructed. This is the Factory Method pattern: each concrete
+factory implements the creation method for its delivery option.
 
-Returning `0` makes pickup free. Adding the new option without modifying the
-calculator demonstrates OCP. Another delivery option can be added in the same way.
+### 3. Prototype
 
-### D - Dependency Inversion Principle (DIP)
+**Purpose:** create a new object by copying an existing one.
 
-**Meaning:** high-level logic should depend on abstractions rather than
-concrete implementations.
+`Order.clone()` uses Python's `deepcopy()` to copy an order, including its
+item list and delivery object. In `main()`, the program clones the standard
+order, then changes only the cloned order's delivery to express delivery.
 
-The high-level calculation logic depends on `Delivery`, which defines the
-common `get_cost()` operation. The calculator receives its delivery through
-the constructor:
+The original order stays standard, while the copy becomes express. The
+prototype output shows both totals. Cloning is useful when a new order should
+start with the same data as an existing order.
 
-```python
-def __init__(self, delivery: Delivery):
-    self.delivery = delivery
-```
+## Other Creational Patterns
 
-`main()` creates the concrete delivery objects and passes each one to the
-calculator:
+The assignment asks students to know the other patterns as well.
 
-```python
-calculator = OrderCalculator(delivery)
-```
+| Pattern | Basic idea |
+| --- | --- |
+| **Singleton** | Provides one shared instance of a class. |
+| **Abstract Factory** | Creates families of related objects through a common factory. |
+| **Object Pool** | Reuses a managed group of objects, often when creating them is expensive. This pattern is optional in the assignment. |
 
-The calculator uses the shared operation to obtain the delivery cost.
-It does not create or select a specific delivery class internally.
-
-The type annotation documents the expected abstraction; it does not enforce
-runtime type checking. DIP is demonstrated by the common delivery interface
-and the separation between object creation and calculation.
+The MiniShop does not need those patterns for this small example, so they are
+described here but are not part of the implementation.
 
 ## Running the Application
 
@@ -158,53 +164,33 @@ From the repository root, run:
 python main.py
 ```
 
-## Execution Results
+Python 3.9 or later is required. No additional packages are needed.
+
+## Expected Output
 
 ```text
-MiniShop: order total calculator
+MiniShop: order builder demo
 Items: 100 + 200 = 300 MDL
 
-Standard delivery (30 MDL): total 330 MDL
-Express delivery (60 MDL): total 360 MDL
-Free pickup (0 MDL): total 300 MDL
+Standard delivery: total 330 MDL
+Express delivery: total 360 MDL
+Free pickup: total 300 MDL
+
+Prototype example:
+Original standard order: 330 MDL
+Cloned order with express delivery: 360 MDL
 ```
-
-## Verification
-
-The application was executed using `python main.py`. It completed successfully,
-and all three totals matched the expected results:
-
-| Case | Expected result | Observed result |
-| --- | ---: | ---: |
-| Standard delivery | 330 MDL | 330 MDL |
-| Express delivery | 360 MDL | 360 MDL |
-| Free pickup | 300 MDL | 300 MDL |
-
-The console output also matches the example in this report.
 
 ## Conclusion
 
-MiniShop demonstrates three SOLID principles in a small Python application.
-SRP separates delivery costs, calculation, and output. OCP is demonstrated by
-adding free pickup without changing the calculator. DIP allows the calculator
-to use the common `Delivery` abstraction while `main()` supplies concrete objects.
-
-## Short Presentation Script
-
-> My project is MiniShop, a small order total calculator. It adds item prices
-> and the cost of standard delivery, express delivery, or free pickup.
->
-> I used three SOLID principles. SRP gives each part its own job:
-> delivery classes provide costs, the calculator calculates the total,
-> and main prints the results.
->
-> OCP is demonstrated by adding PickupDelivery without changing OrderCalculator.
->
-> DIP means that the calculator uses the common Delivery interface.
-> Main creates a delivery object and passes it to the calculator, which calls
-> get_cost() to obtain its cost.
+MiniShop continues the Laboratory 0 project with three creational patterns.
+Builder assembles an order in steps, Factory Method creates the selected
+delivery type, and Prototype copies an order that can then be adapted.
+The program retains its original items and standard, express, and pickup
+options.
 
 ## References
 
 1. [Technical University of Moldova: Software Engineering curriculum](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5) - official English course title.
 2. [Python documentation: Abstract Base Classes](https://docs.python.org/3.13/library/abc.html) - `ABC` and `abstractmethod`.
+3. [Python documentation: copy](https://docs.python.org/3.13/library/copy.html) - `deepcopy()`.

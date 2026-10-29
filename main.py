@@ -1,16 +1,18 @@
+"""MiniShop demonstrates three creational design patterns."""
+
 from abc import ABC, abstractmethod
+from copy import deepcopy
+from typing import Optional
 
 
-# DIP (Dependency Inversion): the calculator depends on this common contract.
 class Delivery(ABC):
-    """Common contract for getting a delivery cost."""
+    """Common product type for the available delivery options."""
 
     @abstractmethod
     def get_cost(self) -> int:
         pass
 
 
-# OCP (Open/Closed): add a new Delivery subclass for a new delivery type.
 class StandardDelivery(Delivery):
     def get_cost(self) -> int:
         return 30
@@ -21,42 +23,104 @@ class ExpressDelivery(Delivery):
         return 60
 
 
-# OCP: add free pickup without changing OrderCalculator.
 class PickupDelivery(Delivery):
     def get_cost(self) -> int:
         return 0
 
 
-class OrderCalculator:
-    """SRP (Single Responsibility): only calculate the order total."""
+# Factory Method: each concrete factory creates one delivery option.
+class DeliveryFactory(ABC):
+    @abstractmethod
+    def create_delivery(self) -> Delivery:
+        pass
 
-    def __init__(self, delivery: Delivery):
-        # DIP: receive the delivery from outside instead of creating it here.
+
+class StandardDeliveryFactory(DeliveryFactory):
+    def create_delivery(self) -> Delivery:
+        return StandardDelivery()
+
+
+class ExpressDeliveryFactory(DeliveryFactory):
+    def create_delivery(self) -> Delivery:
+        return ExpressDelivery()
+
+
+class PickupDeliveryFactory(DeliveryFactory):
+    def create_delivery(self) -> Delivery:
+        return PickupDelivery()
+
+
+class Order:
+    def __init__(self, items: list[int], delivery: Delivery):
+        self.items = items
         self.delivery = delivery
 
-    def calculate_total(self, prices: list[int]) -> int:
-        # OCP: this calculation works with any Delivery implementation.
-        return sum(prices) + self.delivery.get_cost()
+    def total(self) -> int:
+        return sum(self.items) + self.delivery.get_cost()
+
+    def clone(self) -> "Order":
+        """Prototype: return an independent copy of this order."""
+        return deepcopy(self)
+
+
+# Builder: add order parts first, then create the completed order with build().
+class OrderBuilder:
+    def __init__(self):
+        self._items: list[int] = []
+        self._delivery: Optional[Delivery] = None
+
+    def add_item(self, price: int) -> None:
+        self._items.append(price)
+
+    def set_delivery(self, delivery: Delivery) -> None:
+        self._delivery = delivery
+
+    def build(self) -> Order:
+        if self._delivery is None:
+            raise ValueError("Set a delivery option before building the order.")
+
+        return Order(self._items.copy(), self._delivery)
+
+
+def build_order(prices: list[int], factory: DeliveryFactory) -> Order:
+    builder = OrderBuilder()
+    for price in prices:
+        builder.add_item(price)
+
+    builder.set_delivery(factory.create_delivery())
+    return builder.build()
 
 
 def main() -> None:
     prices = [100, 200]
-    deliveries = [
-        ("Standard delivery", StandardDelivery()),
-        ("Express delivery", ExpressDelivery()),
-        ("Free pickup", PickupDelivery()),
+
+    # Builder and Factory Method create the first order.
+    standard_order = build_order(prices, StandardDeliveryFactory())
+
+    # Prototype copies the order; Factory Method supplies express delivery.
+    express_order = standard_order.clone()
+    express_order.delivery = ExpressDeliveryFactory().create_delivery()
+
+    # Builder and Factory Method also create the free-pickup order.
+    pickup_order = build_order(prices, PickupDeliveryFactory())
+
+    orders = [
+        ("Standard delivery", standard_order),
+        ("Express delivery", express_order),
+        ("Free pickup", pickup_order),
     ]
 
-    # SRP: keep console output here, outside OrderCalculator.
-    print("MiniShop: order total calculator")
+    print("MiniShop: order builder demo")
     print(f"Items: {' + '.join(str(price) for price in prices)} = {sum(prices)} MDL")
     print()
 
-    for name, delivery in deliveries:
-        # DIP: pass the chosen delivery into the calculator.
-        calculator = OrderCalculator(delivery)
-        total = calculator.calculate_total(prices)
-        print(f"{name} ({delivery.get_cost()} MDL): total {total} MDL")
+    for name, order in orders:
+        print(f"{name}: total {order.total()} MDL")
+
+    print()
+    print("Prototype example:")
+    print(f"Original standard order: {standard_order.total()} MDL")
+    print(f"Cloned order with express delivery: {express_order.total()} MDL")
 
 
 if __name__ == "__main__":
