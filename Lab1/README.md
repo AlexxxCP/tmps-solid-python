@@ -119,26 +119,12 @@ This makes it clear which parts make up the order before the complete
 classDiagram
     class OrderBuilder {
         <<Builder>>
-        -List~int~ _items
-        -Optional~Delivery~ _delivery
-        +add_item(price)
-        +set_delivery(delivery)
-        +build() Order
+        +add_item()
+        +set_delivery()
+        +build()
     }
-    class Order {
-        +List~int~ items
-        +Delivery delivery
-        +total() int
-        +clone() Order
-    }
-    class Delivery {
-        <<Abstract>>
-        +get_cost() int*
-    }
-    OrderBuilder "1" --> "0..1" Delivery : holds selected option
+    class Order
     OrderBuilder ..> Order : builds
-    Order "1" --> "1" Delivery : uses
-    note for OrderBuilder "build() creates an Order after its parts are set"
 ```
 
 ### 2. Factory Method
@@ -160,42 +146,16 @@ factory implements the creation method for its delivery option.
 classDiagram
     class DeliveryFactory {
         <<Abstract>>
-        +create_delivery() Delivery*
+        +create_delivery()
     }
-    class StandardDeliveryFactory {
-        +create_delivery() Delivery
-    }
-    class ExpressDeliveryFactory {
-        +create_delivery() Delivery
-    }
-    class PickupDeliveryFactory {
-        +create_delivery() Delivery
-    }
-    class Delivery {
-        <<Abstract>>
-        +get_cost() int*
-    }
-    class StandardDelivery {
-        +get_cost() int
-    }
-    class ExpressDelivery {
-        +get_cost() int
-    }
-    class PickupDelivery {
-        +get_cost() int
-    }
-
+    class StandardDeliveryFactory
+    class StandardDelivery
     DeliveryFactory <|-- StandardDeliveryFactory
-    DeliveryFactory <|-- ExpressDeliveryFactory
-    DeliveryFactory <|-- PickupDeliveryFactory
-    Delivery <|.. StandardDelivery
-    Delivery <|.. ExpressDelivery
-    Delivery <|.. PickupDelivery
     StandardDeliveryFactory ..> StandardDelivery : creates
-    ExpressDeliveryFactory ..> ExpressDelivery : creates
-    PickupDeliveryFactory ..> PickupDelivery : creates
-    DeliveryFactory ..> Delivery : returns
 ```
+
+`ExpressDeliveryFactory` and `PickupDeliveryFactory` use the same
+structure to create their respective delivery classes.
 
 ### 3. Prototype
 
@@ -215,17 +175,8 @@ start with the same data as an existing order.
 classDiagram
     class Order {
         <<Prototype>>
-        +List~int~ items
-        +Delivery delivery
-        +total() int
-        +clone() Order
+        +clone()
     }
-    class Delivery {
-        <<Abstract>>
-        +get_cost() int*
-    }
-    Order "1" --> "1" Delivery : contains
-    note for Order "clone() uses deepcopy(self) to return another Order"
 ```
 
 ## Other Creational Patterns
