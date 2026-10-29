@@ -1,4 +1,4 @@
-# TMPS Laboratory Report: SOLID Principles
+# TMPS Laboratory Report 0: SOLID Principles
 
 ## Student Information
 
@@ -155,7 +155,7 @@ and the separation between object creation and calculation.
 From the repository root, run:
 
 ```powershell
-python main.py
+python Lab0/main.py
 ```
 
 ## Execution Results
@@ -171,7 +171,7 @@ Free pickup (0 MDL): total 300 MDL
 
 ## Verification
 
-The application was executed using `python main.py`. It completed successfully,
+The application was executed using `python Lab0/main.py`. It completed successfully,
 and all three totals matched the expected results:
 
 | Case | Expected result | Observed result |
