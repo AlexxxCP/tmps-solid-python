@@ -118,6 +118,33 @@ order = builder.build()
 This makes it clear which parts make up the order before the complete
 `Order` object is created.
 
+#### UML Class Diagram: Builder
+
+```mermaid
+classDiagram
+    class OrderBuilder {
+        <<Builder>>
+        -items
+        -delivery
+        +add_item()
+        +set_delivery()
+        +build()
+    }
+    class Order {
+        +items
+        +delivery
+        +total()
+        +clone()
+    }
+    class Delivery {
+        <<abstract>>
+        +get_cost()
+    }
+    OrderBuilder ..> Delivery : sets
+    OrderBuilder ..> Order : builds
+    Order --> Delivery : stores
+```
+
 ### 2. Factory Method
 
 **Purpose:** let a creator's subclass decide which concrete product to create.
@@ -131,6 +158,36 @@ and `PickupDeliveryFactory`, each return one matching `Delivery` object.
 object is constructed. This is the Factory Method pattern: each concrete
 factory implements the creation method for its delivery option.
 
+#### UML Class Diagram: Factory Method
+
+```mermaid
+classDiagram
+    class Delivery {
+        <<abstract>>
+        +get_cost()
+    }
+    class StandardDelivery
+    class ExpressDelivery
+    class PickupDelivery
+    class DeliveryFactory {
+        <<abstract>>
+        +create_delivery()
+    }
+    class StandardDeliveryFactory
+    class ExpressDeliveryFactory
+    class PickupDeliveryFactory
+
+    Delivery <|.. StandardDelivery
+    Delivery <|.. ExpressDelivery
+    Delivery <|.. PickupDelivery
+    DeliveryFactory <|-- StandardDeliveryFactory
+    DeliveryFactory <|-- ExpressDeliveryFactory
+    DeliveryFactory <|-- PickupDeliveryFactory
+    StandardDeliveryFactory ..> StandardDelivery : creates
+    ExpressDeliveryFactory ..> ExpressDelivery : creates
+    PickupDeliveryFactory ..> PickupDelivery : creates
+```
+
 ### 3. Prototype
 
 **Purpose:** create a new object by copying an existing one.
@@ -142,6 +199,24 @@ order, then changes only the cloned order's delivery to express delivery.
 The original order stays standard, while the copy becomes express. The
 prototype output shows both totals. Cloning is useful when a new order should
 start with the same data as an existing order.
+
+#### UML Class Diagram: Prototype
+
+```mermaid
+classDiagram
+    class Order {
+        <<Prototype>>
+        +items
+        +delivery
+        +total()
+        +clone()
+    }
+    class Delivery {
+        <<abstract>>
+        +get_cost()
+    }
+    Order --> Delivery : contains
+```
 
 ## Other Creational Patterns
 
