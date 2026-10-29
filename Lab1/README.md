@@ -2,15 +2,10 @@
 
 ## Student Information
 
-| Field | Details |
-| --- | --- |
-| Student | Luchiciov Alexei |
-| Group | FAF-241 |
-| Course | Software Design Techniques and Mechanisms (TMPS) |
-| Laboratory work | 1 |
-| Topic | Creational Design Patterns |
-| Project | MiniShop |
-| Programming language | Python |
+This report was prepared by **Luchiciov Alexei** (group **FAF-241**) for
+**Software Design Techniques and Mechanisms (TMPS)**. It presents
+**Laboratory 1: Creational Design Patterns**, implemented in **Python**
+as a continuation of the MiniShop project.
 
 The English course title follows the [official UTM Software Engineering curriculum, page 5](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5).
 
@@ -124,25 +119,26 @@ This makes it clear which parts make up the order before the complete
 classDiagram
     class OrderBuilder {
         <<Builder>>
-        -items
-        -delivery
-        +add_item()
-        +set_delivery()
-        +build()
+        -List~int~ _items
+        -Optional~Delivery~ _delivery
+        +add_item(price)
+        +set_delivery(delivery)
+        +build() Order
     }
     class Order {
-        +items
-        +delivery
-        +total()
-        +clone()
+        +List~int~ items
+        +Delivery delivery
+        +total() int
+        +clone() Order
     }
     class Delivery {
-        <<abstract>>
-        +get_cost()
+        <<Abstract>>
+        +get_cost() int*
     }
-    OrderBuilder ..> Delivery : sets
+    OrderBuilder "1" --> "0..1" Delivery : holds selected option
     OrderBuilder ..> Order : builds
-    Order --> Delivery : stores
+    Order "1" --> "1" Delivery : uses
+    note for OrderBuilder "build() creates an Order after its parts are set"
 ```
 
 ### 2. Factory Method
@@ -162,30 +158,43 @@ factory implements the creation method for its delivery option.
 
 ```mermaid
 classDiagram
-    class Delivery {
-        <<abstract>>
-        +get_cost()
-    }
-    class StandardDelivery
-    class ExpressDelivery
-    class PickupDelivery
     class DeliveryFactory {
-        <<abstract>>
-        +create_delivery()
+        <<Abstract>>
+        +create_delivery() Delivery*
     }
-    class StandardDeliveryFactory
-    class ExpressDeliveryFactory
-    class PickupDeliveryFactory
+    class StandardDeliveryFactory {
+        +create_delivery() Delivery
+    }
+    class ExpressDeliveryFactory {
+        +create_delivery() Delivery
+    }
+    class PickupDeliveryFactory {
+        +create_delivery() Delivery
+    }
+    class Delivery {
+        <<Abstract>>
+        +get_cost() int*
+    }
+    class StandardDelivery {
+        +get_cost() int
+    }
+    class ExpressDelivery {
+        +get_cost() int
+    }
+    class PickupDelivery {
+        +get_cost() int
+    }
 
-    Delivery <|.. StandardDelivery
-    Delivery <|.. ExpressDelivery
-    Delivery <|.. PickupDelivery
     DeliveryFactory <|-- StandardDeliveryFactory
     DeliveryFactory <|-- ExpressDeliveryFactory
     DeliveryFactory <|-- PickupDeliveryFactory
+    Delivery <|.. StandardDelivery
+    Delivery <|.. ExpressDelivery
+    Delivery <|.. PickupDelivery
     StandardDeliveryFactory ..> StandardDelivery : creates
     ExpressDeliveryFactory ..> ExpressDelivery : creates
     PickupDeliveryFactory ..> PickupDelivery : creates
+    DeliveryFactory ..> Delivery : returns
 ```
 
 ### 3. Prototype
@@ -206,16 +215,17 @@ start with the same data as an existing order.
 classDiagram
     class Order {
         <<Prototype>>
-        +items
-        +delivery
-        +total()
-        +clone()
+        +List~int~ items
+        +Delivery delivery
+        +total() int
+        +clone() Order
     }
     class Delivery {
-        <<abstract>>
-        +get_cost()
+        <<Abstract>>
+        +get_cost() int*
     }
-    Order --> Delivery : contains
+    Order "1" --> "1" Delivery : contains
+    note for Order "clone() uses deepcopy(self) to return another Order"
 ```
 
 ## Other Creational Patterns

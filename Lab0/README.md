@@ -2,14 +2,10 @@
 
 ## Student Information
 
-| Field | Details |
-| --- | --- |
-| Student | Luchiciov Alexei |
-| Group | FAF-241 |
-| Course | Software Design Techniques and Mechanisms (TMPS) |
-| Topic | Application of Three SOLID Principles |
-| Project | MiniShop |
-| Programming language | Python |
+This report was prepared by **Luchiciov Alexei** (group **FAF-241**) for
+**Software Design Techniques and Mechanisms (TMPS)**. It presents
+**Laboratory 0: Application of Three SOLID Principles**, implemented in
+**Python** as the MiniShop project.
 
 The English course title follows the [official UTM Software Engineering curriculum, page 5](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5).
 
