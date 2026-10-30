@@ -1,4 +1,4 @@
-"""MiniShop demonstrates three creational design patterns."""
+"""MiniShop demonstrează trei tipare de proiectare creaționale."""
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
@@ -6,7 +6,7 @@ from typing import Optional
 
 
 class Delivery(ABC):
-    """Common product type for the available delivery options."""
+    """Tip comun de produs pentru opțiunile de livrare disponibile."""
 
     @abstractmethod
     def get_cost(self) -> int:
@@ -28,7 +28,7 @@ class PickupDelivery(Delivery):
         return 0
 
 
-# Factory Method: each concrete factory creates one delivery option.
+# Factory Method: fiecare fabrică concretă creează o opțiune de livrare.
 class DeliveryFactory(ABC):
     @abstractmethod
     def create_delivery(self) -> Delivery:
@@ -59,11 +59,11 @@ class Order:
         return sum(self.items) + self.delivery.get_cost()
 
     def clone(self) -> "Order":
-        """Prototype: return an independent copy of this order."""
+        """Prototype: returnează o copie independentă a acestei comenzi."""
         return deepcopy(self)
 
 
-# Builder: add order parts first, then create the completed order with build().
+# Builder: adăugați mai întâi componentele comenzii, apoi creați comanda completă cu build().
 class OrderBuilder:
     def __init__(self):
         self._items: list[int] = []
@@ -94,14 +94,14 @@ def build_order(prices: list[int], factory: DeliveryFactory) -> Order:
 def main() -> None:
     prices = [100, 200]
 
-    # Builder and Factory Method create the first order.
+    # Builder și Factory Method creează prima comandă.
     standard_order = build_order(prices, StandardDeliveryFactory())
 
-    # Prototype copies the order; Factory Method supplies express delivery.
+    # Prototype copiază comanda; Factory Method furnizează livrarea expres.
     express_order = standard_order.clone()
     express_order.delivery = ExpressDeliveryFactory().create_delivery()
 
-    # Builder and Factory Method also create the free-pickup order.
+    # Builder și Factory Method creează și comanda cu ridicare gratuită.
     pickup_order = build_order(prices, PickupDeliveryFactory())
 
     orders = [
