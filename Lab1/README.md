@@ -5,7 +5,7 @@
 This report was prepared by **Luchiciov Alexei** (group **FAF-241**) for
 **Software Design Techniques and Mechanisms (TMPS)**. It presents
 **Laboratory 1: Creational Design Patterns**, implemented in **Python**
-as a continuation of the MiniShop project.
+as a continuation of the MiniShop project. The instructor is **Istrati Daniel**.
 
 The English course title follows the [official UTM Software Engineering curriculum, page 5](https://fcim.utm.md/wp-content/uploads/sites/24/2023/08/inginerie-software.pdf#page=5).
 
