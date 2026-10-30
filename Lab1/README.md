@@ -119,11 +119,15 @@ This makes it clear which parts make up the order before the complete
 classDiagram
     class OrderBuilder {
         <<Builder>>
-        +add_item()
-        +set_delivery()
-        +build()
+        -items
+        -delivery
+        +add_item(price)
+        +set_delivery(delivery)
+        +build() Order
     }
-    class Order
+    class Order {
+        +total()
+    }
     OrderBuilder ..> Order : builds
 ```
 
@@ -144,12 +148,17 @@ factory implements the creation method for its delivery option.
 
 ```mermaid
 classDiagram
+    class Delivery {
+        <<Product>>
+        +get_cost()
+    }
+    class StandardDelivery
     class DeliveryFactory {
-        <<Abstract>>
+        <<Creator>>
         +create_delivery()
     }
     class StandardDeliveryFactory
-    class StandardDelivery
+    Delivery <|.. StandardDelivery
     DeliveryFactory <|-- StandardDeliveryFactory
     StandardDeliveryFactory ..> StandardDelivery : creates
 ```
@@ -175,7 +184,10 @@ start with the same data as an existing order.
 classDiagram
     class Order {
         <<Prototype>>
-        +clone()
+        -items
+        -delivery
+        +total()
+        +clone() Order
     }
 ```
 
