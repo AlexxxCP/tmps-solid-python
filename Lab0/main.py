@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
 
 
-# DIP (Dependency Inversion): the calculator depends on this common contract.
+# DIP (Principiul inversării dependențelor): calculatorul depinde de acest contract comun.
 class Delivery(ABC):
-    """Common contract for getting a delivery cost."""
+    """Contract comun pentru obținerea costului livrării."""
 
     @abstractmethod
     def get_cost(self) -> int:
         pass
 
 
-# OCP (Open/Closed): add a new Delivery subclass for a new delivery type.
+# OCP (Principiul deschis/închis): adăugați o subclasă Delivery pentru un nou tip de livrare.
 class StandardDelivery(Delivery):
     def get_cost(self) -> int:
         return 30
@@ -21,21 +21,21 @@ class ExpressDelivery(Delivery):
         return 60
 
 
-# OCP: add free pickup without changing OrderCalculator.
+# OCP: adăugați ridicarea gratuită fără a modifica OrderCalculator.
 class PickupDelivery(Delivery):
     def get_cost(self) -> int:
         return 0
 
 
 class OrderCalculator:
-    """SRP (Single Responsibility): only calculate the order total."""
+    """SRP (Principiul responsabilității unice): calculează doar totalul comenzii."""
 
     def __init__(self, delivery: Delivery):
-        # DIP: receive the delivery from outside instead of creating it here.
+        # DIP: primiți livrarea din exterior, în loc să o creați aici.
         self.delivery = delivery
 
     def calculate_total(self, prices: list[int]) -> int:
-        # OCP: this calculation works with any Delivery implementation.
+        # OCP: acest calcul funcționează cu orice implementare Delivery.
         return sum(prices) + self.delivery.get_cost()
 
 
@@ -47,13 +47,13 @@ def main() -> None:
         ("Free pickup", PickupDelivery()),
     ]
 
-    # SRP: keep console output here, outside OrderCalculator.
+    # SRP: păstrați afișarea în consolă aici, în afara clasei OrderCalculator.
     print("MiniShop: order total calculator")
     print(f"Items: {' + '.join(str(price) for price in prices)} = {sum(prices)} MDL")
     print()
 
     for name, delivery in deliveries:
-        # DIP: pass the chosen delivery into the calculator.
+        # DIP: transmiteți livrarea aleasă către calculator.
         calculator = OrderCalculator(delivery)
         total = calculator.calculate_total(prices)
         print(f"{name} ({delivery.get_cost()} MDL): total {total} MDL")
